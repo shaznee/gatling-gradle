@@ -1,0 +1,45 @@
+plugins {
+  id 'java'
+  id 'scala'
+}
+
+configurations {
+  gatling
+}
+
+repositories {
+  mavenCentral()
+}
+
+dependencies {
+  gatling('io.gatling.highcharts:gatling-charts-highcharts:2.3.0')
+}
+
+sourceSets {
+  simulations {
+    scala {
+      srcDirs = ['src/gatling/simulations']
+    }
+    resources {
+      srcDirs = ['src/gatling/resources']
+    }
+
+    compileClasspath += configurations.gatling
+  }
+}
+
+task gatlingTest(type: JavaExec) {
+  description = 'Run Gatling Tests'
+  new File("${buildDir}/reports/gatling").mkdirs()
+
+  classpath = sourceSets.simulations.runtimeClasspath += configurations.gatling
+
+  main = "io.gatling.app.Gatling"
+  args = [
+          '-s', 'SampleSimulation',
+          '-sf', 'src/gatling/resources',
+          '-df', 'src/gatling/resources',
+          '-rf', "${buildDir}/reports/gatling"
+  ]
+//  systemProperties System.properties
+}
